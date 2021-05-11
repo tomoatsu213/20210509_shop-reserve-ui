@@ -5,16 +5,20 @@
       <form
         class="form-search"
         id="form-search"
-        action="http://localhost:8080/"
+        action="http://localhost:8081/"
         method="get"
       >
-        <select id="area" name="area">
-          <option value="All area">All area</option>
-          <option value="tokyo">東京都</option>
+        <select id="area" name="area" v-model="selected_area">
+          <option disabled value="">Please select area</option>
+          <option v-for="area in areas" :key="area.id" :value="area.value">
+            {{ area.name }}
+          </option>
         </select>
-        <select id="genre" name="genre">
-          <option value="All genre">All genre</option>
-          <option value="sushi">寿司</option>
+        <select id="genre" name="genre" v-model="selected_genre">
+          <option disabled value="">Please select genre</option>
+          <option v-for="genre in genres" :key="genre.id" :value="genre.value">
+            {{ genre.name }}
+          </option>
         </select>
         <button type="submit" id="search-button">
           <font-awesome-icon icon="search" class="fa-lg icon-search" />
@@ -24,22 +28,23 @@
           name="search"
           type="search"
           placeholder="Search..."
+          v-model="search"
         />
       </form>
     </div>
     <div class="container">
       <div class="contents">
-        <div class="card-space" v-for="(value, index) in shops" :key="index">
+        <div class="card-space" v-for="(data, index) in restaurants" :key="index">
           <div class="card-shop">
-            <img src="value.shop_image" alt="#" width="180px" height="auto" />
-            <p class="shop-name">{{ value.shop_name }}</p>
-            <p>#{{ value.shop_area }} #{{ value.shop_genre }}</p>
+            <img :src="image" alt="#" width="180px" height="auto" />
+            <p class="shop-name">{{ data.shop_name }}</p>
+            <p>#{{ data.shop_area }} #{{ data.shop_genre }}</p>
             <div class="card-footer">
               <button
                 @click="
                   $router.push({
-                    path: '/detail/' + value.item.id,
-                    params: { id: value.item.id },
+                    path: '/detail/' + data.item.id,
+                    params: { id: data.item.id },
                   })
                 "
               >
@@ -91,25 +96,39 @@ export default {
   props: ["id"],
   data() {
     return {
-      shops: [],
+      restaurants: [],
+      image:"value.shop_image",
       path: true,
       profile: true,
       show: true,
+      selected_area: "",
+      selected_genre: "",
+      areas: [
+        { name: "All areas", value: "All areas" },
+        { name: "東京", value: "tokyo" },
+        { name: "埼玉", value: "saitama" },
+      ],
+      genres: [
+        { name: "All genres", value: "All genres" },
+        { name: "寿司", value: "sushi" },
+        { name: "ラーメン", value: "ramen" },
+      ],
+      search: "",
     };
   },
   methods: {
     fav(index) {
-      const result = this.shops[index].favorite.some((value) => {
+      const result = this.restaurants[index].favorite.some((value) => {
         return value.user_id == this.$store.state.user.id;
       });
       if (result) {
-        this.shops[index].favorite.forEach((element) => {
+        this.restaurants[index].favorite.forEach((element) => {
           if (element.user_id == this.$store.state.user.id) {
             axios({
               method: "delete",
               url: "http://127.0.0.1:8000/api/v1/{user_id}/favorites",
               data: {
-                shop_id: this.shops[index].item.id,
+                shop_id: this.restaurants[index].item.id,
                 user_id: this.$store.state.user.id,
               },
             }).then((response) => {
@@ -125,7 +144,7 @@ export default {
       } else {
         axios
           .put("http://127.0.0.1:8000/api/v1/{user_id}/favorites", {
-            shop_id: this.shops[index].item.id,
+            shop_id: this.restaurants[index].item.id,
             user_id: this.$store.state.user.id,
           })
           .then((response) => {
@@ -141,15 +160,17 @@ export default {
     async getShops() {
       let data = [];
       const shops = await axios.get("http://127.0.0.1:8000/api/v1/shops");
-      for (let i = 0; i < shops.data.data.length; i++) {
+      for (let i = 0; i < shops.data.data.length - 15; i++) {
         await axios
-          .get("http://127.0.0.1:8000/api/v1/shops" + shops.data.data[i].id)
+          .get("http://127.0.0.1:8000/api/v1/shops/" + shops.data.data[i].id)
           .then((response) => {
             data.push(response.data);
           });
       }
-      this.shops = data;
-      console.log(this.shops);
+      let parsedobj = JSON.parse(JSON.stringify(data));
+      console.log(parsedobj);
+      this.restaurants = parsedobj;
+      console.log(this.restaurants);
     },
   },
   created() {
@@ -245,7 +266,7 @@ h1 {
 select {
   border: none;
   outline: none;
-  width: 80px;
+  width: 150px;
 }
 
 input {
