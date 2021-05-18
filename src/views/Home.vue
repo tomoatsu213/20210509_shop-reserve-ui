@@ -5,7 +5,7 @@
       <form
         class="form-search"
         id="form-search"
-        action="http://localhost:8081/"
+        action="http://localhost:8080/"
         method="get"
       >
         <select id="area" name="area" v-model="selected_area">
@@ -34,17 +34,23 @@
     </div>
     <div class="container">
       <div class="contents">
-        <div class="card-space" v-for="(data, index) in restaurants" :key="index">
+        <div
+          class="card-space"
+          v-for="(value, index) in restaurants"
+          :key="index"
+        >
           <div class="card-shop">
-            <img :src="image" alt="#" width="180px" height="auto" />
-            <p class="shop-name">{{ data.shop_name }}</p>
-            <p>#{{ data.shop_area }} #{{ data.shop_genre }}</p>
+            <img :src="value.shop_image" alt="#" width="180px" height="auto" />
+            <p class="shop-name">{{ value.shop_name }}</p>
+            <p v-if="restaurants">
+              #{{ value.areas[0].shop_area }} #{{ value.genres[0].shop_genre }}
+            </p>
             <div class="card-footer">
               <button
                 @click="
                   $router.push({
-                    path: '/detail/' + data.item.id,
-                    params: { id: data.item.id },
+                    path: '/detail/' + value.item.id,
+                    params: { id: value.item.id },
                   })
                 "
               >
@@ -65,22 +71,6 @@
             </div>
           </div>
         </div>
-        <div class="card-space">
-          <div class="card-shop">
-            <img
-              src="https://coachtech-matter.s3-ap-northeast-1.amazonaws.com/image/sushi.jpg"
-              alt="#"
-              width="180px"
-              height="auto"
-            />
-            <p class="shop-name">仙人</p>
-            <p>#東京都 #寿司</p>
-            <div class="card-footer">
-              <button @click="$router.push('/detail/id')">詳しくみる</button>
-              <font-awesome-icon icon="heart" class="fa-2x icon-favorite" />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -97,9 +87,10 @@ export default {
   data() {
     return {
       restaurants: [],
-      image:"value.shop_image",
-      path: true,
-      profile: true,
+      // restaurants_data:[],
+      image: "value.shop_image",
+      // path: true,
+      // profile: true,
       show: true,
       selected_area: "",
       selected_genre: "",
@@ -116,6 +107,9 @@ export default {
       search: "",
     };
   },
+  // computed(){
+  //    return this.restaurants = JSON.parse(this.restaurants_data.data);
+  // },
   methods: {
     fav(index) {
       const result = this.restaurants[index].favorite.some((value) => {
@@ -159,18 +153,11 @@ export default {
     },
     async getShops() {
       let data = [];
-      const shops = await axios.get("http://127.0.0.1:8000/api/v1/shops");
-      for (let i = 0; i < shops.data.data.length - 15; i++) {
-        await axios
-          .get("http://127.0.0.1:8000/api/v1/shops/" + shops.data.data[i].id)
-          .then((response) => {
-            data.push(response.data);
-          });
-      }
-      let parsedobj = JSON.parse(JSON.stringify(data));
-      console.log(parsedobj);
-      this.restaurants = parsedobj;
-      console.log(this.restaurants);
+      await axios.get("http://127.0.0.1:8000/api/v1/shops").then((response) => {
+        data.push(response.data);
+        this.restaurants = data[0].data;
+        console.log(this.restaurants);
+      });
     },
   },
   created() {
