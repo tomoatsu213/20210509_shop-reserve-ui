@@ -42,7 +42,7 @@
           <div class="card-shop">
             <img :src="value.shop_image" alt="#" width="180px" height="auto" />
             <p class="shop-name">{{ value.shop_name }}</p>
-            <p v-if="restaurants">
+            <p>
               #{{ value.areas[0].shop_area }} #{{ value.genres[0].shop_genre }}
             </p>
             <div class="card-footer">
@@ -58,15 +58,15 @@
               </button>
               <font-awesome-icon
                 icon="heart"
-                class="fa-2x icon-favorite-none"
+                class="fa-2x icon-favorite"
                 @click="fav(index)"
-                v-if="show"
+                v-show="value.favorites[0]"
               />
               <font-awesome-icon
                 icon="heart"
-                class="fa-2x icon-favorite"
+                class="fa-2x icon-favorite-none"
                 @click="fav(index)"
-                v-else
+                v-show="!value.favorites[0]"
               />
             </div>
           </div>
@@ -87,11 +87,9 @@ export default {
   data() {
     return {
       restaurants: [],
-      // restaurants_data:[],
       image: "value.shop_image",
-      // path: true,
-      // profile: true,
       show: true,
+      // profile: true,
       selected_area: "",
       selected_genre: "",
       areas: [
@@ -107,49 +105,24 @@ export default {
       search: "",
     };
   },
-  // computed(){
-  //    return this.restaurants = JSON.parse(this.restaurants_data.data);
-  // },
   methods: {
     fav(index) {
-      const result = this.restaurants[index].favorite.some((value) => {
-        return value.user_id == this.$store.state.user.id;
-      });
-      if (result) {
-        this.restaurants[index].favorite.forEach((element) => {
-          if (element.user_id == this.$store.state.user.id) {
-            axios({
-              method: "delete",
-              url: "http://127.0.0.1:8000/api/v1/{user_id}/favorites",
-              data: {
-                shop_id: this.restaurants[index].item.id,
-                user_id: this.$store.state.user.id,
-              },
-            }).then((response) => {
-              console.log(response);
-              this.show = !this.show;
-              this.$router.go({
-                path: this.$router.currentRoute.path,
-                force: true,
-              });
-            });
+      axios
+        .put(
+          "http://127.0.0.1:8000/api/v1/shops/" +
+            this.restaurants[index].id +
+            "/favorites",
+          {
+            user_id: this.$store.state.user,
           }
-        });
-      } else {
-        axios
-          .put("http://127.0.0.1:8000/api/v1/{user_id}/favorites", {
-            shop_id: this.restaurants[index].item.id,
-            user_id: this.$store.state.user.id,
-          })
-          .then((response) => {
-            console.log(response);
-            this.show = !this.show;
-            this.$router.go({
-              path: this.$router.currentRoute.path,
-              force: true,
-            });
+        )
+        .then((response) => {
+          console.log(response);
+          this.$router.go({
+            path: this.$router.currentRoute.path,
+            force: true,
           });
-      }
+        });
     },
     async getShops() {
       let data = [];
@@ -162,6 +135,14 @@ export default {
   },
   created() {
     this.getShops();
+    // if (this.restaurants.data.favorites[0]) {
+    //   const checkFavorite = this.restaurants.data.favorites;
+    //   const checkFavoriteUserId = checkFavorite.map((item) => item.user_id);
+    //   const getFavorite = (element) => element === this.$store.state.user;
+    //   // return checkFavorite1.some(checkFavorite2))
+    //   console.log(checkFavoriteUserId.some(getFavorite));
+    //   // this.show; true;
+    // }
   },
 };
 </script>
