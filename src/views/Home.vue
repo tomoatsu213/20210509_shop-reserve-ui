@@ -36,21 +36,19 @@
       <div class="contents">
         <div
           class="card-space"
-          v-for="(value, index) in restaurants"
+          v-for="(value, index) in newRestaurants"
           :key="index"
         >
           <div class="card-shop">
             <img :src="value.shop_image" alt="#" width="180px" height="auto" />
             <p class="shop-name">{{ value.shop_name }}</p>
-            <p>
-              #{{ value.areas[0].shop_area }} #{{ value.genres[0].shop_genre }}
-            </p>
+            <p>#{{ value.shop_area }} #{{ value.shop_genre }}</p>
             <div class="card-footer">
               <button
                 @click="
                   $router.push({
-                    path: '/detail/' + value.item.id,
-                    params: { id: value.item.id },
+                    path: '/detail/' + value.id,
+                    params: { id: value.id },
                   })
                 "
               >
@@ -59,14 +57,14 @@
               <font-awesome-icon
                 icon="heart"
                 class="fa-2x icon-favorite"
-                @click="fav(index)"
-                v-show="value.favorites[0]"
+                @click="deleteFavorite(index)"
+                v-if="value.check_favorite"
               />
               <font-awesome-icon
                 icon="heart"
                 class="fa-2x icon-favorite-none"
-                @click="fav(index)"
-                v-show="!value.favorites[0]"
+                @click="addFavorite(index)"
+                v-else
               />
             </div>
           </div>
@@ -87,33 +85,36 @@ export default {
   data() {
     return {
       restaurants: [],
-      image: "value.shop_image",
-      show: true,
-      // profile: true,
+      newRestaurants: [],
+      // show: true,
       selected_area: "",
       selected_genre: "",
       areas: [
         { name: "All areas", value: "All areas" },
-        { name: "東京", value: "tokyo" },
-        { name: "埼玉", value: "saitama" },
+        { name: "東京都", value: "Tokyo" },
+        { name: "大阪府", value: "Osaka" },
+        { name: "福岡県", value: "Fukuoka" },
       ],
       genres: [
         { name: "All genres", value: "All genres" },
         { name: "寿司", value: "sushi" },
+        { name: "焼肉", value: "yakiniku" },
+        { name: "居酒屋", value: "izakaya" },
+        { name: "イタリアン", value: "italian" },
         { name: "ラーメン", value: "ramen" },
       ],
       search: "",
     };
   },
   methods: {
-    fav(index) {
+    addFavorite(index) {
       axios
         .put(
           "http://127.0.0.1:8000/api/v1/shops/" +
             this.restaurants[index].id +
             "/favorites",
           {
-            user_id: this.$store.state.user,
+            user_id: this.$store.state.user.id,
           }
         )
         .then((response) => {
@@ -124,25 +125,52 @@ export default {
           });
         });
     },
+    deleteFavorite(index) {
+      axios
+        .request({
+          method: "delete",
+          url:
+            "http://127.0.0.1:8000/api/v1/shops/" +
+            this.restaurants[index].id +
+            "/favorites",
+          data: { user_id: this.$store.state.user.id },
+        })
+        .then((response) => {
+          console.log(response);
+          this.$router.go({
+            path: this.$router.currentRoute.path,
+            force: false,
+          });
+        });
+    },
+
     async getShops() {
       let data = [];
       await axios.get("http://127.0.0.1:8000/api/v1/shops").then((response) => {
         data.push(response.data);
         this.restaurants = data[0].data;
         console.log(this.restaurants);
+
+        for (let i = 0; i < this.restaurants.length; i++) {
+          let favoriteLists = this.restaurants[i].favorites;
+          const checkFavorite = favoriteLists.some(
+            (res) => res.user_id === this.$store.state.user.id
+          );
+          this.newRestaurants.push({
+            id: this.restaurants[i].id,
+            shop_name: this.restaurants[i].shop_name,
+            shop_image: this.restaurants[i].shop_image,
+            shop_area: this.restaurants[i].areas[0].shop_area,
+            shop_genre: this.restaurants[i].genres[0].shop_genre,
+            check_favorite: checkFavorite,
+          });
+        }
+        console.log(this.newRestaurants);
       });
     },
   },
   created() {
     this.getShops();
-    // if (this.restaurants.data.favorites[0]) {
-    //   const checkFavorite = this.restaurants.data.favorites;
-    //   const checkFavoriteUserId = checkFavorite.map((item) => item.user_id);
-    //   const getFavorite = (element) => element === this.$store.state.user;
-    //   // return checkFavorite1.some(checkFavorite2))
-    //   console.log(checkFavoriteUserId.some(getFavorite));
-    //   // this.show; true;
-    // }
   },
 };
 </script>

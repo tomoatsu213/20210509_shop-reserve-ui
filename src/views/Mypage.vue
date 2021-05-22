@@ -1,34 +1,43 @@
 <template>
   <div>
     <CommonHeader />
-    <h1>Userさん</h1>
+    <h1>{{ $store.state.user.user_name }}さん</h1>
     <div class="container">
       <div class="contents content-left">
         <h2>予約状況</h2>
-        <div class="card">
+        <div
+          class="card"
+          v-for="(value, index) in newUserReservedRestaurants"
+          :key="index"
+        >
           <div class="table-header">
             <div class="table-title">
               <font-awesome-icon icon="clock" class="fa-2x icon-clock" />
-              <p>予約1</p>
+              <p>予約{{ index + 1 }}</p>
             </div>
-            <font-awesome-icon icon="window-close" class="fa-2x icon-cancel" />
+
+            <font-awesome-icon
+              icon="window-close"
+              class="fa-2x icon-cancel"
+              @click="deleteReservation(index)"
+            />
           </div>
           <table>
             <tr>
               <td>Shop</td>
-              <td>仙人</td>
+              <td>{{ value.shop_name }}</td>
             </tr>
             <tr>
               <td>Date</td>
-              <td>2021-04-01</td>
+              <td>{{ value.reservation_date }}</td>
             </tr>
             <tr>
               <td>Time</td>
-              <td>17:00</td>
+              <td>{{ value.reservation_time }}</td>
             </tr>
             <tr>
               <td>Number</td>
-              <td>1人</td>
+              <td>{{ value.reservation_number }}人</td>
             </tr>
           </table>
         </div>
@@ -36,51 +45,40 @@
       <div class="contents">
         <h2>お気に入り店舗</h2>
         <div class="content-right">
-          <div class="card-space">
+          <div
+            class="card-space"
+            v-for="(value, index) in userFavoriteRestaurants"
+            :key="index"
+          >
             <div class="card-shop">
               <img
-                src="https://coachtech-matter.s3-ap-northeast-1.amazonaws.com/image/sushi.jpg"
+                :src="value.shop_image"
                 alt="#"
                 width="180px"
                 height="auto"
               />
-              <p class="shop-name">仙人</p>
-              <p>#東京都 #寿司</p>
-              <div class="table-footer">
-                <button>詳しくみる</button>
-                <font-awesome-icon icon="heart" class="fa-2x icon-favorite" />
-              </div>
-            </div>
-          </div>
-          <div class="card-space">
-            <div class="card-shop">
-              <img
-                src="https://coachtech-matter.s3-ap-northeast-1.amazonaws.com/image/sushi.jpg"
-                alt="#"
-                width="180px"
-                height="auto"
-              />
-              <p class="shop-name">仙人</p>
-              <p>#東京都 #寿司</p>
-              <div class="table-footer">
-                <button>詳しくみる</button>
-                <font-awesome-icon icon="heart" class="fa-2x icon-favorite" />
-              </div>
-            </div>
-          </div>
-          <div class="card-space">
-            <div class="card-shop">
-              <img
-                src="https://coachtech-matter.s3-ap-northeast-1.amazonaws.com/image/sushi.jpg"
-                alt="#"
-                width="180px"
-                height="auto"
-              />
-              <p class="shop-name">仙人</p>
-              <p>#東京都 #寿司</p>
-              <div class="table-footer">
-                <button>詳しくみる</button>
-                <font-awesome-icon icon="heart" class="fa-2x icon-favorite" />
+              <p class="shop-name">{{ value.shop_name }}</p>
+              <p>
+                #{{ value.areas[0].shop_area }} #{{
+                  value.genres[0].shop_genre
+                }}
+              </p>
+              <div class="card-footer">
+                <button
+                  @click="
+                    $router.push({
+                      path: '/detail/' + value.id,
+                      params: { id: value.id },
+                    })
+                  "
+                >
+                  詳しくみる
+                </button>
+                <font-awesome-icon
+                  icon="heart"
+                  class="fa-2x icon-favorite"
+                  @click="deleteFavorite(index)"
+                />
               </div>
             </div>
           </div>
@@ -92,9 +90,108 @@
 
 <script>
 import CommonHeader from "../components/CommonHeader";
+import axios from "axios";
 export default {
   components: {
     CommonHeader,
+  },
+  props: ["id"],
+  data() {
+    return {
+      userReservedRestaurants: [],
+      newUserReservedRestaurants: [],
+      userFavoriteRestaurants: [],
+      show: true,
+    };
+  },
+  methods: {
+    deleteReservation(index) {
+      axios
+        .request({
+          method: "delete",
+          url:
+            "http://127.0.0.1:8000/api/v1/shops/" +
+            this.userReservedRestaurants[index].id +
+            "/reservations",
+          data: { user_id: this.$store.state.user.id },
+        })
+        .then((response) => {
+          console.log(response);
+          this.$router.go({
+            path: this.$router.currentRoute.path,
+            force: true,
+          });
+        });
+    },
+    deleteFavorite(index) {
+      axios
+        .request({
+          method: "delete",
+          url:
+            "http://127.0.0.1:8000/api/v1/shops/" +
+            this.userFavoriteRestaurants[index].id +
+            "/favorites",
+          data: { user_id: this.$store.state.user.id },
+        })
+        .then((response) => {
+          console.log(response);
+          this.$router.go({
+            path: this.$router.currentRoute.path,
+            force: true,
+          });
+        });
+    },
+
+    async getUserReservedShops() {
+      let data = [];
+      await axios
+        .get(
+          "http://127.0.0.1:8000/api/v1/users/" +
+            this.$store.state.user.id +
+            "/reservations"
+        )
+        .then((response) => {
+          data.push(response.data);
+          this.userReservedRestaurants = data[0].data;
+          console.log(this.userReservedRestaurants);
+
+          for (let i = 0; i < this.userReservedRestaurants.length; i++) {
+            const reservationLists = this.userReservedRestaurants[i].reservations;
+            const checkReservation = reservationLists.some(
+              (res) => res.user_id === this.$store.state.user.id
+            );
+            if (checkReservation) {
+              const reservationData = reservationLists.find((res) => res.user_id === this.$store.state.user.id);
+              this.newUserReservedRestaurants.push({
+                id: this.userReservedRestaurants[i].id,
+                shop_name: this.userReservedRestaurants[i].shop_name,
+                reservation_date: reservationData.reservation_date,
+                reservation_time: reservationData.reservation_time,
+                reservation_number: reservationData.reservation_number,
+              });
+            }
+          }
+          console.log(this.newUserReservedRestaurants);
+        });
+    },
+    async getUserFavoriteShops() {
+      let data = [];
+      await axios
+        .get(
+          "http://127.0.0.1:8000/api/v1/users/" +
+            this.$store.state.user.id +
+            "/favorites"
+        )
+        .then((response) => {
+          data.push(response.data);
+          this.userFavoriteRestaurants = data[0].data;
+          console.log(this.userFavoriteRestaurants);
+        });
+    },
+  },
+  created() {
+    this.getUserReservedShops();
+    this.getUserFavoriteShops();
   },
 };
 </script>
@@ -172,6 +269,11 @@ h1 {
 .card-shop p {
   color: rgb(0, 0, 0);
   padding: 10px 0 2px 15px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-around;
 }
 
 .shop-name {

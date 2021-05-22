@@ -36,7 +36,7 @@ export default new Vuex.Store({
         "http://127.0.0.1:8000/api/v1/users/" + responseLogin.data.data
       );
       commit("auth", responseLogin.data.auth);
-      commit("user", responseUser.data.data.id);
+      commit("user", responseUser.data.data);
       router.replace("/");
     },
     logout({ commit }) {

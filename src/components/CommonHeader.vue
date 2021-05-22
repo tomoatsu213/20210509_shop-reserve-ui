@@ -13,7 +13,7 @@
       </div>
     </div>
     <div class="items" v-if="show">
-      <p @click="$router.push('/mypage')">Mypage</p>
+      <p @click="$router.push('/my-page')">Mypage</p>
       <p @click="$router.push('/')">Shops</p>
       <p @click="$router.push('/register')">Registration</p>
       <p @click="$router.push('/login')">Login</p>

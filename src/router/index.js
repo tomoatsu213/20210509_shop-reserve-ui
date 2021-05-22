@@ -4,7 +4,7 @@ import Home from "../views/Home.vue";
 import Register from "../views/Register.vue";
 import Thanks from "../views/Thanks.vue";
 import Login from "../views/Login.vue";
-import Mypage from "../views/Mypage.vue";
+import MyPage from "../views/MyPage.vue";
 import Detail from "../views/Detail.vue";
 import Done from "../views/Done.vue";
 import NotFound from "../views/NotFound.vue";
@@ -37,9 +37,9 @@ const routes = [
     component: Login,
   },
   {
-    path: "/mypage",
-    name: "Mypage",
-    component: Mypage,
+    path: "/my-page",
+    name: "MyPage",
+    component: MyPage,
     meta: {
       requiresAuth: true,
     },

@@ -4,18 +4,20 @@
     <div class="container">
       <div class="contents">
         <div class="card-space">
-          <h2 class="shop-name">仙人</h2>
+          <h2 class="shop-name">{{ restaurants.shop_name }}</h2>
           <div class="card-shop">
             <img
-              src="https://coachtech-matter.s3-ap-northeast-1.amazonaws.com/image/sushi.jpg"
+              :src="restaurants.shop_image"
               alt="#"
               width="350px"
               height="auto"
             />
-            <p>#東京都 #寿司</p>
             <p>
-              料理長厳選の食材から作る寿司を用いたコースをぜひお楽しみください。食材・味・価格、お客様の満足度を徹底的に追及したお店です。特別な日のお食事、ビジネス接待まで気軽に使用することができます。
+              #{{ restaurants.areas[0].shop_area }} #{{
+                restaurants.genres[0].shop_genre
+              }}
             </p>
+            <p>{{ restaurants.shop_profile }}</p>
           </div>
         </div>
       </div>
@@ -25,22 +27,30 @@
             <div class="table-title">
               <p>予約</p>
               <form action="">
-                <input type="date" min="2021-04-30" />
-                <select name="time" id="time">
+                <input type="date" min="2021-04-30" v-model="reservationDate" />
+                <select name="time" id="time" v-model="reservationTime">
                   <option value="" disabled selected hidden>
                     時刻を選択してください
                   </option>
-                  <option value="17:00">17:00</option>
-                  <option value="18:00">18:00</option>
-                  <option value="19:00">19:00</option>
+                  <option
+                    v-for="timeList in timeLists"
+                    :key="timeList"
+                    :value="timeList"
+                  >
+                    {{ timeList }}
+                  </option>
                 </select>
-                <select name="number" id="number">
+                <select name="number" id="number" v-model="reservationNumber">
                   <option value="" disabled selected hidden>
                     人数を選択してください
                   </option>
-                  <option value="1">1人</option>
-                  <option value="2">2人</option>
-                  <option value="3">3人</option>
+                  <option
+                    v-for="numberList in numberLists"
+                    :key="numberList"
+                    :value="numberList"
+                  >
+                    {{ numberList }}人
+                  </option>
                 </select>
               </form>
             </div>
@@ -48,22 +58,22 @@
           <table>
             <tr>
               <td>Shop</td>
-              <td>仙人</td>
+              <td>{{ restaurants.shop_name }}</td>
             </tr>
             <tr>
               <td>Date</td>
-              <td>2021-04-01</td>
+              <td>{{ this.reservationDate }}</td>
             </tr>
             <tr>
               <td>Time</td>
-              <td>17:00</td>
+              <td>{{ this.reservationTime }}</td>
             </tr>
             <tr>
               <td>Number</td>
-              <td>1人</td>
+              <td>{{ this.reservationNumber }}人</td>
             </tr>
           </table>
-          <button @click="$router.push('/done')">予約する</button>
+          <button @click="addReservation(index)">予約する</button>
         </div>
       </div>
     </div>
@@ -72,11 +82,69 @@
 
 <script>
 import CommonHeader from "../components/CommonHeader";
+import axios from "axios";
 export default {
   components: {
     CommonHeader,
   },
   props: ["id"],
+
+  data() {
+    return {
+      restaurants: [],
+      reservationDate: "",
+      reservationTime: "",
+      reservationNumber: "",
+      timeLists: [],
+      numberLists: [],
+    };
+  },
+  methods: {
+    getTimeLists() {
+      const timeLists = ":00";
+      for (let i = 10; i < 22; i++) {
+        this.timeLists.push(i + timeLists);
+      }
+    },
+    getNumberLists() {
+      for (let i = 1; i < 21; i++) {
+        this.numberLists.push(i);
+      }
+    },
+    addReservation() {
+      axios
+        .post(
+          "http://127.0.0.1:8000/api/v1/shops/" +
+            this.id +
+            "/reservations",
+          {
+            user_id: this.$store.state.user.id,
+            reservation_date: this.reservationDate,
+            reservation_time: this.reservationTime,
+            reservation_number: this.reservationNumber,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          this.$router.push("/done");
+        });
+    },
+    async getShop() {
+      let data = [];
+      await axios
+        .get("http://127.0.0.1:8000/api/v1/shops/" + this.id)
+        .then((response) => {
+          data.push(response.data);
+          this.restaurants = data[0].data;
+          console.log(this.restaurants);
+        });
+    },
+  },
+  created() {
+    this.getShop();
+    this.getTimeLists();
+    this.getNumberLists();
+  },
 };
 </script>
 
