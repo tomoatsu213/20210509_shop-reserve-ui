@@ -68,7 +68,7 @@ export default {
     },
     auth() {
       axios
-        .post("http://127.0.0.1:8000/api/v1/registrations", {
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/registrations", {
           user_name: this.user_name,
           email: this.email,
           password: this.password,

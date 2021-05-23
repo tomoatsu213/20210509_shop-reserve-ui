@@ -110,7 +110,7 @@ export default {
     addFavorite(index) {
       axios
         .put(
-          "http://127.0.0.1:8000/api/v1/shops/" +
+          "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
             this.restaurants[index].id +
             "/favorites",
           {
@@ -130,7 +130,7 @@ export default {
         .request({
           method: "delete",
           url:
-            "http://127.0.0.1:8000/api/v1/shops/" +
+            "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
             this.restaurants[index].id +
             "/favorites",
           data: { user_id: this.$store.state.user.id },
@@ -146,7 +146,7 @@ export default {
 
     async getShops() {
       let data = [];
-      await axios.get("http://127.0.0.1:8000/api/v1/shops").then((response) => {
+      await axios.get("https://stormy-lake-54158.herokuapp.com/api/v1/shops").then((response) => {
         data.push(response.data);
         this.restaurants = data[0].data;
         console.log(this.restaurants);

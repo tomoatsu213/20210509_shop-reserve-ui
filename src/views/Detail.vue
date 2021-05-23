@@ -114,7 +114,7 @@ export default {
     addReservation() {
       axios
         .post(
-          "http://127.0.0.1:8000/api/v1/shops/" +
+          "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
             this.id +
             "/reservations",
           {
@@ -132,7 +132,7 @@ export default {
     async getShop() {
       let data = [];
       await axios
-        .get("http://127.0.0.1:8000/api/v1/shops/" + this.id)
+        .get("https://stormy-lake-54158.herokuapp.com/api/v1/shops/" + this.id)
         .then((response) => {
           data.push(response.data);
           this.restaurants = data[0].data;

@@ -110,7 +110,7 @@ export default {
         .request({
           method: "delete",
           url:
-            "http://127.0.0.1:8000/api/v1/shops/" +
+            "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
             this.userReservedRestaurants[index].id +
             "/reservations",
           data: { user_id: this.$store.state.user.id },
@@ -128,7 +128,7 @@ export default {
         .request({
           method: "delete",
           url:
-            "http://127.0.0.1:8000/api/v1/shops/" +
+            "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
             this.userFavoriteRestaurants[index].id +
             "/favorites",
           data: { user_id: this.$store.state.user.id },
@@ -146,7 +146,7 @@ export default {
       let data = [];
       await axios
         .get(
-          "http://127.0.0.1:8000/api/v1/users/" +
+          "https://stormy-lake-54158.herokuapp.com/api/v1/users/" +
             this.$store.state.user.id +
             "/reservations"
         )
@@ -178,7 +178,7 @@ export default {
       let data = [];
       await axios
         .get(
-          "http://127.0.0.1:8000/api/v1/users/" +
+          "https://stormy-lake-54158.herokuapp.com/api/v1/users/" +
             this.$store.state.user.id +
             "/favorites"
         )

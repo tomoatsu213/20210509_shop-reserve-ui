@@ -26,14 +26,14 @@ export default new Vuex.Store({
   actions: {
     async login({ commit }, { email, password }) {
       const responseLogin = await axios.post(
-        "http://127.0.0.1:8000/api/v1/login",
+        "https://stormy-lake-54158.herokuapp.com/api/v1/login",
         {
           email: email,
           password: password,
         }
       );
       const responseUser = await axios.get(
-        "http://127.0.0.1:8000/api/v1/users/" + responseLogin.data.data
+        "https://stormy-lake-54158.herokuapp.com/api/v1/users/" + responseLogin.data.data
       );
       commit("auth", responseLogin.data.auth);
       commit("user", responseUser.data.data);
@@ -41,7 +41,7 @@ export default new Vuex.Store({
     },
     logout({ commit }) {
       axios
-        .post("http://127.0.0.1:8000/api/v1/logout", {
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/logout", {
           auth: this.state.auth,
         })
         .then((response) => {
