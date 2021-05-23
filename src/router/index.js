@@ -37,7 +37,7 @@ const routes = [
     component: Login,
   },
   {
-    path: "/mypage",
+    path: "/my-page",
     name: "Mypage",
     component: Mypage,
     meta: {
