@@ -1,24 +1,19 @@
-# shop-reserve
+飲食店予約サービスのフロントエンドです。
 
-## Project setup
-```
-yarn install
-```
+【画面】
+・ユーザー登録画面
+・ユーザー登録完了画面
+・ログイン画面
+・マイページ
+・飲食店一覧画面
+・飲食店詳細画面
+・予約完了画面
+・エラー画面
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+【機能】
+・ユーザー登録
+・ログイン
+・ログアウト
+・飲食店検索（エリアとジャンルと名前）
+・飲食店をお気に入りに追加
+・飲食店予約
