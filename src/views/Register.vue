@@ -1,38 +1,62 @@
 <template>
   <div>
-    <CommonHeader />
     <div class="card">
-      <p>Registration</p>
-      <form action="" @submit.prevent="sendContact()">
+      <p class="card-title">Registration</p>
+      <form class="form" @submit.prevent="sendContact()">
         <div class="flex">
           <font-awesome-icon icon="user" class="fa-2x icon" />
-          <input
-            placeholder="Username"
-            type="text"
-            class="name"
-            v-model="user_name"
-          />
+          <ValidationProvider rules="required" v-slot="{ errors }">
+            <input
+              name="Username"
+              placeholder="Username"
+              type="text"
+              class="input name"
+              v-model="user_name"
+            />
+            <p class="validation">{{ errors[0] }}</p>
+          </ValidationProvider>
         </div>
         <div class="flex">
           <font-awesome-icon icon="envelope" class="fa-2x icon" />
-          <input
-            placeholder="Email"
-            type="email"
-            class="email"
-            v-model="email"
-          />
+          <ValidationProvider rules="required|email" v-slot="{ errors }">
+            <input
+              name="Email"
+              placeholder="Email"
+              type="email"
+              class="input email"
+              v-model="email"
+            />
+            <p class="validation">{{ errors[0] }}</p>
+          </ValidationProvider>
         </div>
         <div class="flex">
           <font-awesome-icon icon="lock" class="fa-2x icon" />
-          <input
-            placeholder="Password"
-            type="password"
-            class="password"
-            v-model="password"
-          />
+          <ValidationProvider rules="required|min:6" v-slot="{ errors }">
+            <input
+              name="Password"
+              placeholder="Password"
+              type="password"
+              class="input password"
+              v-model="password"
+            />
+            <p class="validation">{{ errors[0] }}</p>
+          </ValidationProvider>
+        </div>
+        <div class="flex">
+          <font-awesome-icon icon="lock" class="fa-2x icon" />
+          <ValidationProvider rules="required|min:6" v-slot="{ errors }">
+            <input
+              name="Confirmation of Password"
+              placeholder="Confirmation of password"
+              type="password"
+              class="input password"
+              v-model="password_confirmation"
+            />
+            <p class="validation">{{ errors[0] }}</p>
+          </ValidationProvider>
         </div>
         <div class="form-button">
-          <button @click="auth">登録</button>
+          <button class="button">登録</button>
         </div>
       </form>
     </div>
@@ -40,43 +64,55 @@
 </template>
 
 <script>
-import CommonHeader from "../components/CommonHeader";
 import axios from "axios";
+import Vue from "vue";
+import { ValidationProvider, localize, extend } from "vee-validate";
+// ルール設定
+import * as rules from "vee-validate/dist/rules";
+for (let rule in rules) {
+  extend(rule, rules[rule]);
+}
+
+// 日本語化
+import ja from "vee-validate/dist/locale/ja";
+localize("ja", ja);
+
+// コンポーネント設定
+Vue.component("ValidationProvider", ValidationProvider);
 export default {
+  components: {
+    ValidationProvider,
+  },
   data() {
     return {
       user_name: "",
       email: "",
       password: "",
+      password_confirmation: "",
     };
-  },
-  components: {
-    CommonHeader,
   },
   // バリデーション
   methods: {
     sendContact() {
-      if (this.user_name == "" || this.email == "" || this.password == "") {
-        alert("入力されていない項目があります");
-      } else {
-        //送信をしたらテキストが空になるように更新
-        this.user_name = "";
-        this.email = "";
-        this.password = "";
-        alert("送信しました");
-      }
-    },
-    auth() {
       axios
-        .post("https://stormy-lake-54158.herokuapp.com/api/v1/registrations", {
+        .post("http://127.0.0.1:8000/api/v1/auth/registrations", {
           user_name: this.user_name,
           email: this.email,
           password: this.password,
+          password_confirmation: this.password_confirmation,
         })
         .then((response) => {
           console.log(response);
+          //送信をしたらテキストが空になるように更新
+          this.user_name = "";
+          this.email = "";
+          this.password = "";
+          this.password_confirmation = "";
           this.$router.replace("/thanks");
         })
+        .catch(() => {
+          alert('登録できません');
+        });
     },
   },
 };
@@ -84,8 +120,10 @@ export default {
 
 
 <style scoped>
-button {
+.button {
+  float: right;
   width: 40px;
+  margin: 15px 23px 15px 0;
   padding: 4px 0px;
   color: #fff;
   background-color: rgb(53, 96, 246);
@@ -99,14 +137,15 @@ button {
   border-radius: 5px;
   box-shadow: 1px 1px 1px 1px rgb(163, 163, 163);
 }
-.card p {
+.card-title {
   font-size: 1.2rem;
   color: white;
   font-weight: bold;
   background-color: rgb(53, 96, 246);
   padding: 15px;
 }
-input {
+
+.input {
   margin-top: 15px;
   padding: 5px;
   border-top: none;
@@ -117,14 +156,9 @@ input {
   outline: none;
 }
 
-form {
+.form {
   text-align: center;
   overflow: hidden;
-}
-
-form button {
-  float: right;
-  margin: 15px 23px 15px 0;
 }
 
 .icon {
@@ -132,19 +166,26 @@ form button {
 }
 
 .name {
-  width: 79.5%;
+  width: 278px;
 }
 
 .email {
-  width: 78.8%;
+  width: 278px;
 }
 
 .password {
-  width: 79.5%;
+  width: 280px;
 }
 
 .flex {
   display: flex;
-  justify-content: start;
+  flex-wrap: wrap;
+}
+
+.validation {
+  text-align: left;
+  padding-top: 5px;
+  color: rgb(228, 0, 0);
+  width: 100%;
 }
 </style>

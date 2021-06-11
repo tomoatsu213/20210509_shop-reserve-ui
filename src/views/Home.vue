@@ -1,6 +1,5 @@
 <template>
   <div>
-    <CommonHeader />
     <div class="search-container">
       <form
         class="form-search"
@@ -8,27 +7,28 @@
         action="http://localhost:8080/"
         method="get"
       >
-        <select id="area" name="area" v-model="selected_area">
+        <select class="select" id="area" name="area" v-model="selectedArea">
           <option disabled value="">Please select area</option>
-          <option v-for="area in areas" :key="area.id" :value="area.value">
-            {{ area.name }}
+          <option v-for="(value, id) in shopsAreas" :key="id">
+            {{ value.shop_area }}
           </option>
         </select>
-        <select id="genre" name="genre" v-model="selected_genre">
+        <select class="select" id="genre" name="genre" v-model="selectedGenre">
           <option disabled value="">Please select genre</option>
-          <option v-for="genre in genres" :key="genre.id" :value="genre.value">
-            {{ genre.name }}
+          <option v-for="(value, id) in shopsGenres" :key="id">
+            {{ value.shop_genre }}
           </option>
         </select>
         <button type="submit" id="search-button">
           <font-awesome-icon icon="search" class="fa-lg icon-search" />
         </button>
         <input
+          class="input"
           id="search"
           name="search"
           type="search"
           placeholder="Search..."
-          v-model="search"
+          v-model="keyword"
         />
       </form>
     </div>
@@ -36,13 +36,25 @@
       <div class="contents">
         <div
           class="card-space"
-          v-for="(value, index) in newRestaurants"
-          :key="index"
+          v-for="(value, index) in filteredRestaurants"
+          :key="value.id"
         >
           <div class="card-shop">
             <img :src="value.shop_image" alt="#" width="180px" height="auto" />
-            <p class="shop-name">{{ value.shop_name }}</p>
-            <p>#{{ value.shop_area }} #{{ value.shop_genre }}</p>
+            <p class="card-shop-name card-shop-text">{{ value.shop_name }}</p>
+            <p class="card-shop-text">
+              #{{ value.shop_area }} #{{ value.shop_genre }}
+            </p>
+            <div class="star">
+              <StarRating
+                :rating="value.shop_star"
+                :increment="0.01"
+                :max-rating="5"
+                :star-size="20"
+                :round-start-rating="false"
+                :read-only="true"
+              />
+            </div>
             <div class="card-footer">
               <button
                 @click="
@@ -57,13 +69,13 @@
               <font-awesome-icon
                 icon="heart"
                 class="fa-2x icon-favorite"
-                @click="deleteFavorite(index)"
+                @click="deleteFavorite(index, value.id)"
                 v-if="value.check_favorite"
               />
               <font-awesome-icon
                 icon="heart"
                 class="fa-2x icon-favorite-none"
-                @click="addFavorite(index)"
+                @click="addFavorite(index, value.id)"
                 v-else
               />
             </div>
@@ -75,98 +87,97 @@
 </template>
 
 <script>
-import CommonHeader from "../components/CommonHeader";
 import axios from "axios";
+import StarRating from "vue-star-rating";
 export default {
   components: {
-    CommonHeader,
+    StarRating,
   },
-  props: ["id"],
   data() {
     return {
       restaurants: [],
-      newRestaurants: [],
-      // show: true,
-      selected_area: "",
-      selected_genre: "",
-      areas: [
-        { name: "All areas", value: "All areas" },
-        { name: "東京都", value: "Tokyo" },
-        { name: "大阪府", value: "Osaka" },
-        { name: "福岡県", value: "Fukuoka" },
-      ],
-      genres: [
-        { name: "All genres", value: "All genres" },
-        { name: "寿司", value: "sushi" },
-        { name: "焼肉", value: "yakiniku" },
-        { name: "居酒屋", value: "izakaya" },
-        { name: "イタリアン", value: "italian" },
-        { name: "ラーメン", value: "ramen" },
-      ],
-      search: "",
+      shopsAreas: [],
+      shopsGenres: [],
+      selectedArea: "",
+      selectedGenre: "",
+      keyword: "",
     };
   },
+  computed: {
+    filteredRestaurants() {
+      let restaurants = [];
+      for (let i in this.restaurants) {
+        let restaurant = this.restaurants[i];
+        if (
+          restaurant.shop_area.indexOf(this.selectedArea) !== -1 &&
+          restaurant.shop_genre.indexOf(this.selectedGenre) !== -1 &&
+          restaurant.shop_name.indexOf(this.keyword) !== -1
+        ) {
+          restaurants.push(restaurant);
+        }
+      }
+      return restaurants;
+    },
+  },
   methods: {
-    addFavorite(index) {
+    addFavorite(index, id) {
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + this.$store.state.accessToken;
       axios
-        .put(
-          "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
-            this.restaurants[index].id +
-            "/favorites",
-          {
-            user_id: this.$store.state.user.id,
-          }
-        )
+        .put("http://127.0.0.1:8000/api/v1/shops/" + id + "/favorites")
         .then((response) => {
           console.log(response);
-          this.$router.go({
-            path: this.$router.currentRoute.path,
-            force: true,
-          });
+          this.filteredRestaurants[index].check_favorite = true;
         });
     },
-    deleteFavorite(index) {
+    deleteFavorite(index, id) {
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + this.$store.state.accessToken;
       axios
         .request({
           method: "delete",
-          url:
-            "https://stormy-lake-54158.herokuapp.com/api/v1/shops/" +
-            this.restaurants[index].id +
-            "/favorites",
-          data: { user_id: this.$store.state.user.id },
+          url: "http://127.0.0.1:8000/api/v1/shops/" + id + "/favorites",
         })
         .then((response) => {
           console.log(response);
-          this.$router.go({
-            path: this.$router.currentRoute.path,
-            force: false,
-          });
+          this.filteredRestaurants[index].check_favorite = false;
         });
     },
-
     async getShops() {
-      let data = [];
-      await axios.get("https://stormy-lake-54158.herokuapp.com/api/v1/shops").then((response) => {
-        data.push(response.data);
-        this.restaurants = data[0].data;
-        console.log(this.restaurants);
+      let shopData = [];
+      let shopsAreas = [];
+      let shopsGenres = [];
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + this.$store.state.accessToken;
+      await axios
+        .get("http://127.0.0.1:8000/api/v1/shops")
+        .then((response) => {
+          shopData.push(response.data);
+          this.restaurants = shopData[0].data;
+          console.log(this.restaurants);
+          this.$store.dispatch("secondLogin");
+        })
+        .catch(() => {
+          this.$store.commit("accessToken", null);
+          this.$store.commit("auth", false);
+          this.$router.replace("/login");
+        });
 
-        for (let i = 0; i < this.restaurants.length; i++) {
-          let favoriteLists = this.restaurants[i].favorites;
-          const checkFavorite = favoriteLists.some(
-            (res) => res.user_id === this.$store.state.user.id
-          );
-          this.newRestaurants.push({
-            id: this.restaurants[i].id,
-            shop_name: this.restaurants[i].shop_name,
-            shop_image: this.restaurants[i].shop_image,
-            shop_area: this.restaurants[i].areas[0].shop_area,
-            shop_genre: this.restaurants[i].genres[0].shop_genre,
-            check_favorite: checkFavorite,
-          });
-        }
-        console.log(this.newRestaurants);
-      });
+      await axios
+        .get("http://127.0.0.1:8000/api/v1/shops/areas")
+        .then((response) => {
+          shopsAreas.push(response.data);
+          this.shopsAreas = shopsAreas[0].data;
+          console.log(this.shopsAreas);
+        });
+
+      await axios
+        .get("http://127.0.0.1:8000/api/v1/shops/genres")
+        .then((response) => {
+          shopsGenres.push(response.data);
+          this.shopsGenres = shopsGenres[0].data;
+          console.log(this.shopsGenres);
+        });
     },
   },
   created() {
@@ -186,13 +197,6 @@ button {
   background-color: rgb(53, 96, 246);
   border-radius: 5px;
   cursor: pointer;
-}
-
-h1 {
-  position: absolute;
-  left: 52%;
-  font-size: 2rem;
-  margin: 50px 0 0 0;
 }
 
 .container {
@@ -218,14 +222,14 @@ h1 {
   box-shadow: 1px 1px 1px 1px rgb(163, 163, 163);
 }
 
-.card-shop p {
-  color: rgb(0, 0, 0);
-  padding: 10px 0 2px 15px;
-}
-
-.shop-name {
+.card-shop-name {
   font-size: 1.6rem;
   font-weight: bold;
+}
+
+.card-shop-text {
+  color: rgb(0, 0, 0);
+  padding: 10px 0 2px 15px;
 }
 
 .icon-favorite {
@@ -259,13 +263,13 @@ h1 {
   box-shadow: 1px 1px 1px 1px rgb(163, 163, 163);
 }
 
-select {
+.select {
   border: none;
   outline: none;
   width: 150px;
 }
 
-input {
+.input {
   appearance: none;
   border: none;
   outline: none;
@@ -279,5 +283,12 @@ input {
   border: none;
   width: 30px;
   padding: 0 0 10px 0;
+}
+
+.star {
+  margin-left: 20px;
+  font-size: 18px;
+  color: red;
+  font-weight: bold;
 }
 </style>
