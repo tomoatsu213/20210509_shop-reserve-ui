@@ -31,7 +31,7 @@ export default new Vuex.Store({
   actions: {
     userFirstLogin({ commit }, { email, password }) {
       axios
-        .post("https://stormy-lake-54158.herokuapp/api/v1/login", {
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/login", {
           email: email,
           password: password,
         })
@@ -43,7 +43,7 @@ export default new Vuex.Store({
           axios
             .request({
               method: "get",
-              url: "https://stormy-lake-54158.herokuapp/api/v1/user-profile",
+              url: "https://stormy-lake-54158.herokuapp.com/api/v1/user-profile",
               headers: {
                 "Authorization": "Bearer " + token,
               }
