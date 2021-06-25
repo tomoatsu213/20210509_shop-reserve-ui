@@ -40,7 +40,6 @@ export default new Vuex.Store({
           const token = res.data.access_token;
           commit("accessToken", token);
           commit("auth", true);
-          axios.defaults.headers.common["Authorization"] = "Bearer " + token;
           axios
             .request({
               method: "get",
