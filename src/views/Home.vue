@@ -74,7 +74,7 @@ export default {
           method: "get",
           url: "https://stormy-lake-54158.herokuapp.com/api/v1/shops",
           headers: {
-            ["Authorization"]: "Bearer " + this.$store.state.accessToken,
+            ["Authorization"]: "Bearer" + this.$store.state.accessToken,
           },
         })
         .then((response) => {
