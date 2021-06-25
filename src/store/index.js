@@ -53,7 +53,7 @@ export default new Vuex.Store({
               method: "get",
               url: "https://stormy-lake-54158.herokuapp.com/api/v1/shops",
               headers: {
-                ["Authorization"]: "Bearer" + this.$store.state.accessToken,
+                ["Authorization"]: "Bearer" + this.state.accessToken,
               },
             })
             // .then((response) => {
