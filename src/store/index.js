@@ -40,18 +40,31 @@ export default new Vuex.Store({
           const token = res.data.access_token;
           commit("accessToken", token);
           commit("auth", true);
-          axios
+          // axios
+          //   .request({
+          //     method: "get",
+          //     url: "https://stormy-lake-54158.herokuapp.com/api/v1/user-profile",
+          //     headers: {
+          //       "Authorization": `Bearer ${token}`,
+          //     }
+          //   })
+            axios
             .request({
               method: "get",
-              url: "https://stormy-lake-54158.herokuapp.com/api/v1/user-profile",
+              url: "https://stormy-lake-54158.herokuapp.com/api/v1/shops",
               headers: {
-                "Authorization": `Bearer ${token}`,
-              }
+                ["Authorization"]: "Bearer" + this.$store.state.accessToken,
+              },
             })
-            .then((res) => {
-              const userProfile = res.data;
-              commit("user", userProfile);
-              console.log(this.state.user);
+            // .then((response) => {
+            //   shopData.push(response.data);
+            //   this.restaurants = shopData[0].data;
+            //   console.log(this.restaurants);
+            // })
+            .then(() => {
+              // const userProfile = res.data;
+              // commit("user", userProfile);
+              // console.log(this.state.user);
               router.replace("/");
             }).catch((error) => {
               console.log(error);
