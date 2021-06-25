@@ -41,12 +41,20 @@ export default new Vuex.Store({
           commit("accessToken", token);
           commit("auth", true);
           axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-          axios.get("https://stormy-lake-54158.herokuapp.com/api/v1/user-profile").then((res) => {
-            const userProfile = res.data;
-            commit("user", userProfile);
-            console.log(this.state.user);
-            router.replace("/");
-          });
+          axios
+            .request({
+              method: "get",
+              url: "https://stormy-lake-54158.herokuapp.com/api/v1/user-profile",
+              headers: {
+                ["Authorization"]: "Bearer " + token,
+              }
+            })
+            .then((res) => {
+              const userProfile = res.data;
+              commit("user", userProfile);
+              console.log(this.state.user);
+              router.replace("/");
+            });
         })
         .catch((error) => {
           console.log(error);
