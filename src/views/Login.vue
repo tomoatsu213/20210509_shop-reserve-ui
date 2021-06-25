@@ -2,7 +2,33 @@
   <div>
     <div class="card">
       <p class="card-title">Login</p>
-      <form class="form" @submit.prevent="sendContact()">
+      <div class="tabs">
+        <input
+          class="radio"
+          type="radio"
+          id="user-tab"
+          value="1"
+          v-model="isActive"
+        />
+        <label class="tab" for="user-tab">User</label>
+        <input
+          class="radio"
+          type="radio"
+          id="owner-tab"
+          value="2"
+          v-model="isActive"
+        />
+        <label class="tab"  for="owner-tab">Owner</label>
+        <input
+          class="radio"
+          type="radio"
+          id="admin-tab"
+          value="3"
+          v-model="isActive"
+        />
+        <label class="tab" for="admin-tab">Admin</label>
+      </div>
+      <form class="form" @submit.prevent>
         <div class="flex">
           <font-awesome-icon icon="envelope" class="fa-2x icon" />
           <ValidationProvider rules="required|email" v-slot="{ errors }">
@@ -30,7 +56,23 @@
           </ValidationProvider>
         </div>
         <div class="form-button">
-          <button class="button">ログイン</button>
+          <button class="button" @click="userLogin()" v-if="isActive === '1'">
+            ログイン
+          </button>
+          <button
+            class="button"
+            @click="ownerLogin()"
+            v-else-if="isActive === '2'"
+          >
+            ログイン
+          </button>
+          <button
+            class="button"
+            @click="adminLogin()"
+            v-else-if="isActive === '3'"
+          >
+            ログイン
+          </button>
         </div>
       </form>
     </div>
@@ -58,16 +100,25 @@ export default {
   },
   data() {
     return {
+      isActive: "1",
       email: "",
       password: "",
     };
   },
-  // バリデーション
   methods: {
-    sendContact() {
-      this.$store.dispatch("firstLogin", {
+    userLogin() {
+      this.$store.dispatch("userFirstLogin", {
         email: this.email,
         password: this.password,
+      });
+      //送信をしたらテキストが空になるように更新
+      this.email = "";
+      this.password = "";
+    },
+    adminLogin() {
+      this.$store.dispatch("adminFirstLogin", {
+        admin_email: this.email,
+        admin_password: this.password,
       });
       //送信をしたらテキストが空になるように更新
       this.email = "";
@@ -141,5 +192,29 @@ export default {
   padding-top: 5px;
   color: rgb(228, 0, 0);
   width: 100%;
+}
+
+.tabs :checked + label{
+  background-color: rgb(255, 94, 0);
+  color:rgb(255, 255, 255);
+}
+
+.radio{
+  display: none;
+}
+
+.tabs{
+  padding:7.3px 0;
+}
+
+.tab{
+  font-weight: bold;
+  padding:7px 37.5px 7px 39px;
+  border-top: none;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+  border-bottom: 1px solid black;
+  color: black;
+  background-color:rgb(214, 214, 255);
 }
 </style>

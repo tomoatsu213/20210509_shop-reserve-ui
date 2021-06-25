@@ -11,10 +11,8 @@ export default new Vuex.Store({
   state: {
     auth: "",
     accessToken: "",
-    // accessTokenCreatedDate: "",
-    // accessTokenExpiration: "",
-    // refreshToken: "",
     user: "",
+    admin: ""
   },
   mutations: {
     auth(state, payload) {
@@ -23,40 +21,32 @@ export default new Vuex.Store({
     accessToken(state, payload) {
       state.accessToken = payload;
     },
-    // accessTokenCreatedDate(state, payload) {
-    //   state.accessTokenCreatedDate = payload;
-    // },
-    // accessTokenExpiration(state, payload) {
-    //   state.accessTokenExpiration = payload;
-    // },
     user(state, payload) {
       state.user = payload;
     },
+    admin(state, payload) {
+      state.admin = payload;
+    },
   },
   actions: {
-    firstLogin({ commit }, { email, password }) {
+    userFirstLogin({ commit }, { email, password }) {
       axios
-        .post("http://127.0.0.1:8000/api/v1/auth/login", {
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/login", {
           email: email,
           password: password,
         })
         .then((res) => {
           console.log(res);
           const token = res.data.access_token;
-          // const accessTokenExpiration = res.data.expires_in;
-          // commit("accessTokenExpiration", accessTokenExpiration);
           commit("accessToken", token);
           commit("auth", true);
           axios.defaults.headers.common["Authorization"] = "Bearer " + token;
-          axios
-            .get("http://127.0.0.1:8000/api/v1/auth/user-profile")
-            .then((res) => {
-              // console.log(res);
-              const userProfile = res.data;
-              commit("user", userProfile);
-              console.log(this.state.user);
-              router.replace("/");
-            });
+          axios.get("https://stormy-lake-54158.herokuapp.com/api/v1/user-profile").then((res) => {
+            const userProfile = res.data;
+            commit("user", userProfile);
+            console.log(this.state.user);
+            router.replace("/");
+          });
         })
         .catch((error) => {
           console.log(error);
@@ -64,12 +54,15 @@ export default new Vuex.Store({
         });
     },
     secondLogin({ commit }) {
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + this.state.accessToken;
       axios
-        .get("http://127.0.0.1:8000/api/v1/auth/refresh")
+        .get("https://stormy-lake-54158.herokuapp.com/api/v1/refresh")
         .then((res) => {
           console.log(res);
           const token = res.data.access_token;
           commit("accessToken", token);
+          router.replace("/");
         })
         .catch((error) => {
           console.log(error);
@@ -77,11 +70,51 @@ export default new Vuex.Store({
           commit("auth", false);
           router.replace("/login");
         });
-      // });
     },
     logout({ commit }) {
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + this.state.accessToken;
       axios
-        .post("http://127.0.0.1:8000/api/v1/auth/logout")
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/logout")
+        .then((res) => {
+          console.log(res);
+          commit("accessToken", null);
+          commit("auth", false);
+          router.replace("/login");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    adminFirstLogin({ commit }, { email, password }) {
+      axios
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/admin/login", {
+          email: email,
+          password: password,
+        })
+        .then((res) => {
+          console.log(res);
+          const token = res.data.access_token;
+          commit("accessToken", token);
+          commit("auth", true);
+          axios.defaults.headers.common["Authorization"] = "Bearer " + token;
+          axios.get("https://stormy-lake-54158.herokuapp.com/api/v1/admin/admin-profile").then((res) => {
+            const adminProfile = res.data;
+            commit("admin", adminProfile);
+            console.log(this.state.admin);
+            router.replace("/");
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          alert("ログインできません");
+        });
+    },
+    adminLogout({ commit }) {
+      axios.defaults.headers.common["Authorization"] =
+        "Bearer " + this.state.accessToken;
+      axios
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/admin/logout")
         .then((res) => {
           console.log(res);
           commit("accessToken", null);

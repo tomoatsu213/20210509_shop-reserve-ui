@@ -2,7 +2,7 @@
   <div>
     <div class="card">
       <p class="card-title">Registration</p>
-      <form class="form" @submit.prevent="sendContact()">
+      <form class="form" @submit.prevent="register()">
         <div class="flex">
           <font-awesome-icon icon="user" class="fa-2x icon" />
           <ValidationProvider rules="required" v-slot="{ errors }">
@@ -10,7 +10,7 @@
               name="Username"
               placeholder="Username"
               type="text"
-              class="input name"
+              class="input"
               v-model="user_name"
             />
             <p class="validation">{{ errors[0] }}</p>
@@ -23,7 +23,7 @@
               name="Email"
               placeholder="Email"
               type="email"
-              class="input email"
+              class="input"
               v-model="email"
             />
             <p class="validation">{{ errors[0] }}</p>
@@ -36,7 +36,7 @@
               name="Password"
               placeholder="Password"
               type="password"
-              class="input password"
+              class="input"
               v-model="password"
             />
             <p class="validation">{{ errors[0] }}</p>
@@ -49,7 +49,7 @@
               name="Confirmation of Password"
               placeholder="Confirmation of password"
               type="password"
-              class="input password"
+              class="input"
               v-model="password_confirmation"
             />
             <p class="validation">{{ errors[0] }}</p>
@@ -93,9 +93,9 @@ export default {
   },
   // バリデーション
   methods: {
-    sendContact() {
+    register() {
       axios
-        .post("http://127.0.0.1:8000/api/v1/auth/registrations", {
+        .post("https://stormy-lake-54158.herokuapp.com/api/v1/registrations", {
           user_name: this.user_name,
           email: this.email,
           password: this.password,
@@ -132,7 +132,7 @@ export default {
 }
 .card {
   margin: 100px auto;
-  width: 350px;
+  width: 400px;
   background: #fff;
   border-radius: 5px;
   box-shadow: 1px 1px 1px 1px rgb(163, 163, 163);
@@ -148,6 +148,7 @@ export default {
 .input {
   margin-top: 15px;
   padding: 5px;
+  width:325px;
   border-top: none;
   border-right: none;
   border-left: none;
@@ -163,18 +164,6 @@ export default {
 
 .icon {
   padding: 18px 5px 0 15px;
-}
-
-.name {
-  width: 278px;
-}
-
-.email {
-  width: 278px;
-}
-
-.password {
-  width: 280px;
 }
 
 .flex {

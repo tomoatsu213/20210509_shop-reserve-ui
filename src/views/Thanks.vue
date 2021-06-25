@@ -3,14 +3,14 @@
     <div class="card">
       <p class="card-text">会員登録ありがとうございます</p>
       <div class="form">
-          <button @click="$router.push('/login')">ログインする</button>
+          <button class="button" @click="$router.push('/login')">ログインする</button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-button {
+.button {
   font-size: 1.2rem;
   width: 100px;
   margin: 15px 23px 15px 0;
@@ -20,6 +20,7 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
+
 .card {
   margin: 20px auto;
   padding: 50px 0;
